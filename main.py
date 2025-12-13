@@ -180,6 +180,15 @@ class flock:
         for boi in self.boids:
             pygame.draw.circle(screen, "red", (boi.x, boi.y), boi.sight, width=1)
 
+    def _view_direction(self) -> None:
+        """
+        helper to view direction of boid
+        """
+        for b in self.boids:
+            center = (b.x + 5, b.y + 5)
+            end = (center[0] + b.d[0] * 15, center[1] + b.d[1] * 15)
+            pygame.draw.line(screen, "black", center, end, width=3)
+
 
 flocky = flock(50)
 while running:
@@ -189,8 +198,12 @@ while running:
 
     screen.fill("white")
 
+    background = pygame.image.load("Toronto_map.png")
+    screen.blit(background, (0, 0))
+
     flocky.flyem()
     # flocky._view_radius()
+    flocky._view_direction()
     for recty in flocky.boids:
         pygame.draw.rect(screen, "blue", recty.rect, 40)
 
