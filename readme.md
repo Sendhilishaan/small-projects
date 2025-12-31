@@ -1,20 +1,11 @@
-## Boids simulation in pygame
+## collection of small projects
 
-Simple boids simulation, displays rectangles as boids
+### boids:
 
-### Parameters
+A bird flocking simulation based on the boids artificial life program by Craig Reynolds.
 
-- number of boids can be changed by changing the flock input parameter
-- cohesion, seperation, and alignment can be changed by changing the fields in the boid class
+This is implemented in python using pygame and numpy.
 
-### TODO:
-- add sliders for changing the cohesion, serperation, and alignment attributes
-- make it look prettier
-- fix bug where a group of boids can get stuck / small circle rotations
+### conway's game of life:
 
-- implement feature that changes color of all boids grouped together
-- add boids on click at location
-
-also can probably use numpy for faster vector operations, but not a bottleneck whatsoever
-
-idea... evil boids...
+self explanatory. Implemented in C using sdl2
