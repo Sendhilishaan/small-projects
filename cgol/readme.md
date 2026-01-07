@@ -10,3 +10,5 @@ Each cell has eight neighbours, all those adjacent in the grid. At each step in 
 - Any live cell with fewer than two live neighbours lives on to the next generation
 - Any live cell with more than three live neighbours dies
 - Any dead cell with exactly three live neighbours becomes a live cell
+
+fix crude add / rem functions, unnessecary calculations
