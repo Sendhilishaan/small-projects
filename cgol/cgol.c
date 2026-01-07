@@ -20,8 +20,6 @@
 void draw_grid();
 void test_rect(SDL_Window *window, SDL_Surface *surface, int x);
 void load_grid(SDL_Window *window, SDL_Surface *surface);
-void logic(SDL_Surface *surface);
-void drawGrid(SDL_Surface *surface);
 
 int GRID[SCREEN_WIDTH / PIXEL_SIZE][SCREEN_HEIGHT / PIXEL_SIZE];
 
@@ -35,8 +33,10 @@ typedef struct {
 	cell *cells; // dynamic array
 } cellList;
 
-void addCell(SDL_Window *window, SDL_Surface *surface, int x, int y, cellList *aliveCells);
-void remCell(SDL_Window *window, SDL_Surface *surface, int x, int y, cellList *aliveCells);
+void drawGrid(SDL_Surface *surface, cellList aliveCells);
+void logic(SDL_Surface *surface, cellList *aliveCells);
+void addCell(SDL_Surface *surface, int x, int y, cellList *aliveCells);
+void remCell(SDL_Surface *surface, int x, int y, cellList *aliveCells);
 
 int main() {
 	SDL_Window *window = NULL;
@@ -83,10 +83,10 @@ int main() {
 			}
 
 			if (event.button.button == SDL_BUTTON_LEFT && event.type == SDL_MOUSEBUTTONDOWN) {
-				addCell(window, surface, event.button.x, event.button.y, &aliveCells);
+				addCell(surface, event.button.x, event.button.y, &aliveCells);
 			}
 			if (event.button.button == SDL_BUTTON_RIGHT && event.type == SDL_MOUSEBUTTONDOWN) {
-				remCell(window, surface, event.button.x, event.button.y, &aliveCells);
+				remCell(surface, event.button.x, event.button.y, &aliveCells);
 			}
 			if (event.key.keysym.sym == SDLK_RETURN) {
 				playing = 1;
@@ -99,8 +99,8 @@ int main() {
 		// call the window update func here
 		if (playing == 1) {
 			SDL_FillRect(surface, NULL, 0x00000000);
-			logic(surface);
-			drawGrid(surface);
+			logic(surface, &aliveCells);
+			drawGrid(surface, aliveCells);
 			load_grid(window, surface);
 			SDL_Delay(1000);
 		}
@@ -136,7 +136,7 @@ void load_grid(SDL_Window *window, SDL_Surface *surface) {
 	}
 }
 
-void addCell(SDL_Window *window, SDL_Surface *surface, int x, int y, cellList *aliveCells) {
+void addCell(SDL_Surface *surface, int x, int y, cellList *aliveCells) {
 	// add cell on lmb click at that location
 	// and to grid
 
@@ -163,7 +163,7 @@ void addCell(SDL_Window *window, SDL_Surface *surface, int x, int y, cellList *a
 		GRID[xArr][yArr] = 1;
 	}
 }
-void remCell(SDL_Window *window, SDL_Surface *surface, int x, int y, cellList *aliveCells) {
+void remCell(SDL_Surface *surface, int x, int y, cellList *aliveCells) {
 	// add cell on lmb click at that location
 	// and to grid
 
@@ -177,10 +177,10 @@ void remCell(SDL_Window *window, SDL_Surface *surface, int x, int y, cellList *a
 		SDL_Rect *cell = &(SDL_Rect){xPos + 1, yPos + 1, PIXEL_SIZE - 1, PIXEL_SIZE - 1};
 		SDL_FillRect(surface, cell, 0x00000000);
 
-		for (size_t i = aliveCells->count; i < aliveCells->count; i++) {
+		for (size_t i = 0; i < aliveCells->count; i++) {
 			if (aliveCells->cells[i].x == xPos && aliveCells->cells[i].y == yPos) {
 				for (size_t j = i; j < aliveCells->count - 1; j++) {
-					aliveCells[j] = aliveCells[j + 1];
+					aliveCells->cells[j] = aliveCells->cells[j + 1];
 				}
 				aliveCells->count--;
 				break;
@@ -191,13 +191,13 @@ void remCell(SDL_Window *window, SDL_Surface *surface, int x, int y, cellList *a
 	}
 }
 
-void logic(SDL_Surface *surface) {
+void logic(SDL_Surface *surface, cellList *aliveCells) {
 	static int nextGrid[SCREEN_WIDTH / PIXEL_SIZE][SCREEN_HEIGHT / PIXEL_SIZE];
 
 	// this needs alot of optimisation, just getting logic down
 	// and also can write cleaner vars
-	for (int x = 0; x <= SCREEN_WIDTH / PIXEL_SIZE; x++) {
-		for (int y = 0; y <= SCREEN_HEIGHT / PIXEL_SIZE; y++) {
+	for (int x = 0; x < SCREEN_WIDTH / PIXEL_SIZE; x++) {
+		for (int y = 0; y < SCREEN_HEIGHT / PIXEL_SIZE; y++) {
 			int liveCells = 0;
 
 			for (int dx = -1; dx <= 1; dx++) {
@@ -214,21 +214,24 @@ void logic(SDL_Surface *surface) {
 				}
 			}
 			
-			if (liveCells < 2 || liveCells > 3) nextGrid[x][y] = 0;
+			if (liveCells < 2 || liveCells > 3) {
+				remCell(surface, x * PIXEL_SIZE, y * PIXEL_SIZE, aliveCells);
+				nextGrid[x][y] = 0;
+			}
 			if (liveCells == 2 || liveCells == 3) nextGrid[x][y] = GRID[x][y];
-			if (liveCells == 3) nextGrid[x][y] = 1;
+			if (liveCells == 3) {
+				addCell(surface, x * PIXEL_SIZE, y * PIXEL_SIZE, aliveCells);
+				nextGrid[x][y] = 1;
+			}
 		}
 	}
 
 	memcpy(GRID, nextGrid, sizeof(nextGrid));
 }
 
-void drawGrid(SDL_Surface *surface) {
-	for (int x = 0; x <= SCREEN_WIDTH / PIXEL_SIZE; x++) {
-		for (int y = 0; y <= SCREEN_HEIGHT / PIXEL_SIZE; y++) {
-
-			SDL_Rect *cell = &(SDL_Rect){x * PIXEL_SIZE , y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE};
-			if (GRID[x][y] == 1) { SDL_FillRect(surface, cell, 0x00ffffff); }
-		}
+void drawGrid(SDL_Surface *surface, cellList aliveCells) {
+	for (int i = 0; i < aliveCells.count; i++) {
+		SDL_Rect *cell = &(SDL_Rect){aliveCells.cells[i].x, aliveCells.cells[i].y, PIXEL_SIZE, PIXEL_SIZE};
+		SDL_FillRect(surface, cell, 0x00ffffff);
 	}
 }
