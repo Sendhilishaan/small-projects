@@ -9,4 +9,4 @@ Boids is a simple simulation of flocking behavior introduced by Craig Reynolds. 
 
 Despite these simple rules, the system produces complex, realistic group motion similar to birds flocking or fish schooling. Boids is commonly used in computer graphics, games, and simulations to demonstrate emergent behavior.
 
-This was written using pygame in python, and uses some messy vector calculus I learnt in MAT237. Most of the parameters are easily adjustable in the boid class or in the main function.
+This was written using pygame because I only wanted to worry about the math (I should have used numpy). This was a nice application of the vector calculus I learnt in 237 despite everything else. Maybe in the future I will make the boids look less ugly.
