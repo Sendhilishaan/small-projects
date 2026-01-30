@@ -1,5 +1,7 @@
 ## collection of small projects
 
+Small projects that I work on inbetween big projects or if I see something cool I want to implement. Mostly fun graphics / algorithms / math.
+
 ### boids:
 
 A bird flocking simulation based on the boids artificial life program by Craig Reynolds.
