@@ -35,3 +35,7 @@ for (int multiple = 3 * p; multiple <= n; multiple += 2 * p)
 ```
 
 This skips all even multiples, and stores them in an odd-index array. I just learnt this is called a compressed sieve array, which is used in the implementation of the wheel factorisation.
+
+# TODO:
+
+Optimise it more for fun (maybe async?). Someone wrote it in CUDA.
