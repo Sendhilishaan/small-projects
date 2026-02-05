@@ -27,3 +27,11 @@ Uses the Rosser-Schoenfeld upper bound to estimate π(n), the number of primes l
 - For n ≥ 17: π(n) < 1.26 × n / ln(n)
 
 This ensures calloc allocates sufficient space without significant waste.
+
+##### Optimisation i'm proud of:
+
+```c
+for (int multiple = 3 * p; multiple <= n; multiple += 2 * p)
+```
+
+This skips all even multiples, and stores them in an odd-index array. I just learnt this is called a compressed sieve array, which is used in the implementation of the wheel factorisation.
