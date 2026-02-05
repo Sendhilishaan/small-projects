@@ -10,4 +10,8 @@ This is implemented in python using pygame and numpy.
 
 ### conway's game of life:
 
-self explanatory. Implemented in C using sdl2
+self explanatory. Implemented in C using sdl2.
+
+### Sieve of Eratosthenes:
+
+Fun, fast prime number generator with lots of room for code optimisation.
