@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "SDL2/SDL_events.h"
-#include "SDL2/SDL_keycode.h"
 #include "SDL2/SDL_mouse.h"
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_surface.h>
@@ -27,22 +26,49 @@ typedef struct {
 
 } Sand;
 
-array<array<int, SCREEN_HEIGHT>, SCREEN_WIDTH> grid = {0};
+array<array<int, SCREEN_HEIGHT>, SCREEN_WIDTH> grid = {{0}};
 vector<Sand> sand_list;
 
 void move_all() {
-	for (Sand& grain : sand_list) {
-		if (grain.y - 1 > SCREEN_HEIGHT / PIXEL_SIZE) { 
-			if (grid[grain.x][grain.y - 1] == FREE) {
-				grain.y -= 1;
-			}
-			
-		}
-	}
+    for (Sand& grain : sand_list) {
+        if (grain.y + 1 < SCREEN_HEIGHT / PIXEL_SIZE) {
+            if (grid[grain.x][grain.y + 1] == FREE) {
+                grid[grain.x][grain.y] = FREE;
+                grain.y += 1;
+                grid[grain.x][grain.y] = OCCUPIED;
+                grain.rect.y = grain.y * PIXEL_SIZE;
+            }
+            else if (grain.x + 1 < SCREEN_WIDTH / PIXEL_SIZE && grid[grain.x + 1][grain.y + 1] == FREE) {
+                grid[grain.x][grain.y] = FREE;
+                grain.x += 1;
+                grain.y += 1;
+                grid[grain.x][grain.y] = OCCUPIED;
+                grain.rect.x = grain.x * PIXEL_SIZE;
+                grain.rect.y = grain.y * PIXEL_SIZE;
+            }
+            else if (grain.x - 1 >= 0 && grid[grain.x - 1][grain.y + 1] == FREE) {
+                grid[grain.x][grain.y] = FREE;
+                grain.x -= 1;
+                grain.y += 1;
+                grid[grain.x][grain.y] = OCCUPIED;
+                grain.rect.x = grain.x * PIXEL_SIZE;
+                grain.rect.y = grain.y * PIXEL_SIZE;
+            }
+        }
+    }
 }
 
 void sort_sand() {
-	// keep the sand in the sand_list sorted in non-decreasing y values
+	// sort sand non decreasing y
+	sort(sand_list.begin(), sand_list.end(), [](Sand a, Sand b){
+		return a.y < b.y;
+	});
+}
+
+void draw_sand(SDL_Surface* surface) {
+	for (const Sand& sand : sand_list) {
+		SDL_FillRect(surface, &(sand.rect), 0xFFFF00);
+	}
 }
 
 int main() {
@@ -78,7 +104,8 @@ int main() {
 				running = 0;
 			}
 
-			if (event.button.button == SDL_BUTTON_LEFT && event.type == SDL_MOUSEBUTTONDOWN && grid[event.button.x][event.button.y] == 1) {
+			if (event.button.button == SDL_BUTTON_LEFT && event.type == SDL_MOUSEBUTTONDOWN && grid[event.button.x][event.button.y] == FREE) {
+				// x, y in terms of grid coords
 				int x = event.button.x / PIXEL_SIZE;
 				int y = event.button.y / PIXEL_SIZE;
 
@@ -86,7 +113,7 @@ int main() {
 					x,
 					y,
 					true,
-					SDL_Rect{x, y, PIXEL_SIZE, PIXEL_SIZE}
+					SDL_Rect{x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE}
 				};
 
 				grid[x][y] = 1;
@@ -96,9 +123,12 @@ int main() {
 			// sdl events here, once per frame
 
 		}
+		SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0, 0, 0));
 
-		// main logic here
-
+		sort_sand();
+		move_all();
+		draw_sand(surface);
+		
 		SDL_UpdateWindowSurface(window);
 		SDL_Delay(16); //framerate
 
@@ -106,4 +136,3 @@ int main() {
 
 	return 1;
 }
-
