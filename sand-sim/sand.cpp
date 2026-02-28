@@ -97,14 +97,19 @@ int main() {
 	SDL_Event event;
 	int running = 1;
 	SDL_Surface *surface = SDL_GetWindowSurface(window);
+	bool mouse_hold = false;
 
 	while (running) {
 		while(SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT) {
 				running = 0;
 			}
+			if (event.button.button == SDL_BUTTON_LEFT && event.type == SDL_MOUSEBUTTONDOWN) {
+				mouse_hold = true;
+			} 
 
-			if (event.button.button == SDL_BUTTON_LEFT && event.type == SDL_MOUSEBUTTONDOWN && grid[event.button.x][event.button.y] == FREE) {
+			if (mouse_hold && grid[event.button.x][event.button.y] == FREE) {
+
 				// x, y in terms of grid coords
 				int x = event.button.x / PIXEL_SIZE;
 				int y = event.button.y / PIXEL_SIZE;
@@ -120,9 +125,11 @@ int main() {
 				sand_list.push_back(newcell);
 			}
 
-			// sdl events here, once per frame
-
+			if (event.button.button == SDL_BUTTON_LEFT && event.type == SDL_MOUSEBUTTONUP) {
+				mouse_hold = false;
+			} 
 		}
+
 		SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0, 0, 0));
 
 		sort_sand();
@@ -130,7 +137,7 @@ int main() {
 		draw_sand(surface);
 		
 		SDL_UpdateWindowSurface(window);
-		SDL_Delay(16); //framerate
+		SDL_Delay(16);
 
 	}
 
